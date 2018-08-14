@@ -41,11 +41,11 @@ public class SimpleDaoGeneratorTest {
         File outputDir = new File("build/test-out");
         outputDir.mkdirs();
 
-        File daoFile = new File(outputDir, "org/greenrobot/testdao/" + addressEntity.getClassName() + "Dao.java");
+        File daoFile = new File(outputDir, "org/greenrobot/testdao/" + addressEntity.getClassName() + "Dao.kt");
         daoFile.delete();
         assertFalse(daoFile.exists());
 
-        new DaoGenerator().generateAll(schema, outputDir.getPath());
+        new DaoGenerator(true).generateAll(schema, outputDir.getPath());
 
         assertEquals("PRIMARY KEY", idProperty.getConstraints());
         assertTrue(daoFile.toString(), daoFile.exists());

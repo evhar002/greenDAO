@@ -50,7 +50,18 @@ public class DaoGenerator {
     private Template templateDaoUnitTest;
     private Template templateContentProvider;
 
+    private boolean isKotlin = false;
+
     public DaoGenerator() throws IOException {
+        init("");
+    }
+
+    public DaoGenerator(boolean isKotlin) throws IOException {
+        this.isKotlin = isKotlin;
+        init(isKotlin ? "kotlin/" : "");
+    }
+
+    private void init(String baseFolder) throws IOException {
         System.out.println("greenDAO Generator");
         System.out.println("Copyright 2011-2016 Markus Junginger, greenrobot.de. Licensed under GPL V3.");
         System.out.println("This program comes with ABSOLUTELY NO WARRANTY");
@@ -60,9 +71,9 @@ public class DaoGenerator {
         patternKeepMethods = compilePattern("METHODS");
 
         Configuration config = getConfiguration("dao.ftl");
-        templateDao = config.getTemplate("dao.ftl");
-        templateDaoMaster = config.getTemplate("dao-master.ftl");
-        templateDaoSession = config.getTemplate("dao-session.ftl");
+        templateDao = config.getTemplate(baseFolder + "dao.ftl");
+        templateDaoMaster = config.getTemplate(baseFolder + "dao-master.ftl");
+        templateDaoSession = config.getTemplate(baseFolder + "dao-session.ftl");
         templateEntity = config.getTemplate("entity.ftl");
         templateDaoUnitTest = config.getTemplate("dao-unit-test.ftl");
         templateContentProvider = config.getTemplate("content-provider.ftl");
@@ -126,11 +137,11 @@ public class DaoGenerator {
             if (outDirTestFile != null && !entity.isSkipGenerationTest()) {
                 String javaPackageTest = entity.getJavaPackageTest();
                 String classNameTest = entity.getClassNameTest();
-                File javaFilename = toJavaFilename(outDirTestFile, javaPackageTest, classNameTest);
-                if (!javaFilename.exists()) {
+                File filename = toFilename(outDirTestFile, javaPackageTest, classNameTest);
+                if (!filename.exists()) {
                     generate(templateDaoUnitTest, outDirTestFile, javaPackageTest, classNameTest, schema, entity);
                 } else {
-                    System.out.println("Skipped " + javaFilename.getCanonicalPath());
+                    System.out.println("Skipped " + filename.getCanonicalPath());
                 }
             }
             for (ContentProvider contentProvider : entity.getContentProviders()) {
@@ -172,7 +183,7 @@ public class DaoGenerator {
             root.putAll(additionalObjectsForTemplate);
         }
         try {
-            File file = toJavaFilename(outDirFile, javaPackage, javaClassName);
+            File file = toFilename(outDirFile, javaPackage, javaClassName);
             //noinspection ResultOfMethodCallIgnored
             file.getParentFile().mkdirs();
 
@@ -223,10 +234,10 @@ public class DaoGenerator {
         }
     }
 
-    protected File toJavaFilename(File outDirFile, String javaPackage, String javaClassName) {
+    protected File toFilename(File outDirFile, String javaPackage, String javaClassName) {
         String packageSubPath = javaPackage.replace('.', '/');
         File packagePath = new File(outDirFile, packageSubPath);
-        return new File(packagePath, javaClassName + ".java");
+        return new File(packagePath, javaClassName + (isKotlin ? ".kt" : ".java"));
     }
 
 }
